@@ -1,63 +1,80 @@
 package recomendacao.app;
 
-import java.io.IOException;
-import java.nio.file.Path;
-import java.util.EnumSet;
-import java.util.List;
-import java.util.stream.Collectors;
-
 import recomendacao.criterio.CriterioClassificacao;
 import recomendacao.criterio.CriterioDuracao;
 import recomendacao.criterio.CriterioGenero;
-import recomendacao.criterio.CriterioHumor;
-import recomendacao.model.Classificacao;
+import recomendacao.criterio.CriterioRecomendacao;
+import recomendacao.model.ClassificacaoEtaria;
 import recomendacao.model.Filme;
-import recomendacao.model.Genero;
-import recomendacao.model.Humor;
+import recomendacao.model.FilmeRecomendado;
 import recomendacao.model.PerfilUsuario;
-import recomendacao.model.Recomendacao;
 import recomendacao.repository.CatalogoFilmes;
+import recomendacao.service.CalculadoraPontuacao;
 import recomendacao.service.MotorRecomendacao;
 
-public class Main {
-    private static final Path CAMINHO_ARQUIVO_FILMES = Path.of("OO/src/filmes");
+import java.util.List;
 
-    public static void main(String[] args) throws IOException {
-        PerfilUsuario perfil = new PerfilUsuario(
-                EnumSet.of(Genero.ACAO, Genero.FICCAO_CIENTIFICA),
-                Humor.ANIMADO,
+public class Main {
+    public static void main(String[] args) {
+        CatalogoFilmes catalogoFilmes = new CatalogoFilmes();
+        List<Filme> catalogo = catalogoFilmes.listarFilmes();
+
+        PerfilUsuario perfilUsuario = new PerfilUsuario(
+                List.of("acao", "ficcao_cientifica"),
+                "animado",
                 150,
-                Classificacao.QUATORZE
+                ClassificacaoEtaria.CATORZE
         );
 
-        CatalogoFilmes catalogo = new CatalogoFilmes(CAMINHO_ARQUIVO_FILMES);
-        MotorRecomendacao motor = new MotorRecomendacao(List.of(
+        List<CriterioRecomendacao> criterios = List.of(
                 new CriterioGenero(),
                 new CriterioDuracao(),
-                new CriterioClassificacao(),
-                new CriterioHumor()
-        ));
+                new CriterioClassificacao()
+        );
 
-        List<Recomendacao> recomendacoes = motor.recomendar(catalogo.listarTodos(), perfil);
+        CalculadoraPontuacao calculadoraPontuacao = new CalculadoraPontuacao();
+        MotorRecomendacao motorRecomendacao = new MotorRecomendacao(criterios, calculadoraPontuacao);
 
-        for (Recomendacao recomendacao : recomendacoes) {
-            System.out.println(formatar(recomendacao));
-        }
+        imprimirRecomendacoes(
+                "Primeira recomendacao",
+                motorRecomendacao.recomendar(catalogo, perfilUsuario)
+        );
+
+        perfilUsuario.atualizarPerfil(
+                List.of("drama", "romance"),
+                "reflexivo",
+                180,
+                ClassificacaoEtaria.DEZOITO
+        );
+
+        imprimirRecomendacoes(
+                "Segunda recomendacao",
+                motorRecomendacao.recomendar(catalogo, perfilUsuario)
+        );
     }
 
-    private static String formatar(Recomendacao recomendacao) {
-        Filme filme = recomendacao.getFilme();
-        String generos = filme.getGeneros().stream()
-                .map(Genero::getDescricao)
-                .collect(Collectors.joining(" + "));
+    private static void imprimirRecomendacoes(String titulo, List<FilmeRecomendado> recomendacoes) {
+        System.out.println(titulo);
+        System.out.println("-".repeat(titulo.length()));
 
-        return String.format(
-                "[%d pts] %s (%s, %d min, %s)",
-                recomendacao.getPontuacao(),
-                filme.getTitulo(),
-                generos,
-                filme.getDuracaoMinutos(),
-                filme.getClassificacao().getDescricao()
-        );
+        if (recomendacoes.isEmpty()) {
+            System.out.println("Nenhum filme recomendado.");
+            System.out.println();
+            return;
+        }
+
+        for (FilmeRecomendado recomendacao : recomendacoes) {
+            Filme filme = recomendacao.getFilme();
+            System.out.printf(
+                    "%s | generos: %s | duracao: %d min | classificacao: %s | pontuacao: %d%n",
+                    filme.getTitulo(),
+                    String.join(", ", filme.getGeneros()),
+                    filme.getDuracaoMinutos(),
+                    filme.getClassificacaoEtaria(),
+                    recomendacao.getPontuacao()
+            );
+        }
+
+        System.out.println();
     }
 }

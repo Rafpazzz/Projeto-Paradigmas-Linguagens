@@ -1,14 +1,10 @@
 package recomendacao.model;
 
-public class Recomendacao {
+public class FilmeRecomendado {
     private final Filme filme;
     private final int pontuacao;
 
-    public Recomendacao(Filme filme, int pontuacao) {
-        if (filme == null) {
-            throw new IllegalArgumentException("Filme recomendado deve ser informado.");
-        }
-
+    public FilmeRecomendado(Filme filme, int pontuacao) {
         this.filme = filme;
         this.pontuacao = pontuacao;
     }

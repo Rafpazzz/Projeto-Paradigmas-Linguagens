@@ -1,51 +1,45 @@
 package recomendacao.model;
 
-import java.util.Collections;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class Filme {
     private final String titulo;
-    private final List<Genero> generos;
+    private final List<String> generos;
     private final int duracaoMinutos;
-    private final Classificacao classificacao;
+    private final ClassificacaoEtaria classificacaoEtaria;
 
-    public Filme(String titulo, List<Genero> generos, int duracaoMinutos, Classificacao classificacao) {
-        if (titulo == null || titulo.isBlank()) {
-            throw new IllegalArgumentException("Titulo do filme deve ser informado.");
-        }
-
-        if (generos == null || generos.isEmpty()) {
-            throw new IllegalArgumentException("Filme deve possuir pelo menos um genero.");
-        }
-
-        if (duracaoMinutos <= 0) {
-            throw new IllegalArgumentException("Duracao do filme deve ser positiva.");
-        }
-
-        if (classificacao == null) {
-            throw new IllegalArgumentException("Classificacao do filme deve ser informada.");
-        }
-
+    public Filme(String titulo, List<String> generos, int duracaoMinutos, ClassificacaoEtaria classificacaoEtaria) {
         this.titulo = titulo;
-        this.generos = Collections.unmodifiableList(new ArrayList<>(generos));
+        this.generos = new ArrayList<>(generos);
         this.duracaoMinutos = duracaoMinutos;
-        this.classificacao = classificacao;
+        this.classificacaoEtaria = classificacaoEtaria;
     }
 
     public String getTitulo() {
         return titulo;
     }
 
-    public List<Genero> getGeneros() {
-        return generos;
+    public List<String> getGeneros() {
+        return Collections.unmodifiableList(generos);
     }
 
     public int getDuracaoMinutos() {
         return duracaoMinutos;
     }
 
-    public Classificacao getClassificacao() {
-        return classificacao;
+    public ClassificacaoEtaria getClassificacaoEtaria() {
+        return classificacaoEtaria;
+    }
+
+    public boolean possuiAlgumGenero(List<String> generosBuscados) {
+        for (String genero : generos) {
+            if (generosBuscados.contains(genero)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

@@ -2,8 +2,8 @@ package recomendacao.service;
 
 import recomendacao.criterio.CriterioRecomendacao;
 import recomendacao.model.Filme;
+import recomendacao.model.FilmeRecomendado;
 import recomendacao.model.PerfilUsuario;
-import recomendacao.model.Recomendacao;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -13,42 +13,33 @@ public class MotorRecomendacao {
     private static final int PONTUACAO_MINIMA = 2;
 
     private final List<CriterioRecomendacao> criterios;
+    private final CalculadoraPontuacao calculadoraPontuacao;
 
-    public MotorRecomendacao(List<CriterioRecomendacao> criterios) {
-        if (criterios == null || criterios.isEmpty()) {
-            throw new IllegalArgumentException("Ao menos um criterio deve ser informado.");
-        }
-
-        this.criterios = List.copyOf(criterios);
+    public MotorRecomendacao(List<CriterioRecomendacao> criterios, CalculadoraPontuacao calculadoraPontuacao) {
+        this.criterios = new ArrayList<>(criterios);
+        this.calculadoraPontuacao = calculadoraPontuacao;
     }
 
-    public List<Recomendacao> recomendar(List<Filme> filmes, PerfilUsuario perfil) {
-        List<Recomendacao> recomendacoes = new ArrayList<>();
+    public List<FilmeRecomendado> recomendar(List<Filme> filmes, PerfilUsuario perfilUsuario) {
+        List<FilmeRecomendado> recomendacoes = new ArrayList<>();
 
         for (Filme filme : filmes) {
-            if (!aceitoPorTodosOsCriterios(filme, perfil)) {
-                continue;
-            }
-
-            int pontuacao = calcularPontuacaoTotal(filme, perfil);
-
-            if (pontuacao >= PONTUACAO_MINIMA) {
-                recomendacoes.add(new Recomendacao(filme, pontuacao));
+            if (todosCriteriosAceitam(filme, perfilUsuario)) {
+                adicionarSeTiverPontuacaoMinima(recomendacoes, filme, perfilUsuario);
             }
         }
 
         recomendacoes.sort(
-                Comparator.comparingInt(Recomendacao::getPontuacao)
-                        .reversed()
+                Comparator.comparingInt(FilmeRecomendado::getPontuacao).reversed()
                         .thenComparing(recomendacao -> recomendacao.getFilme().getTitulo())
         );
 
         return recomendacoes;
     }
 
-    private boolean aceitoPorTodosOsCriterios(Filme filme, PerfilUsuario perfil) {
+    private boolean todosCriteriosAceitam(Filme filme, PerfilUsuario perfilUsuario) {
         for (CriterioRecomendacao criterio : criterios) {
-            if (!criterio.aceita(filme, perfil)) {
+            if (!criterio.aceita(filme, perfilUsuario)) {
                 return false;
             }
         }
@@ -56,13 +47,15 @@ public class MotorRecomendacao {
         return true;
     }
 
-    private int calcularPontuacaoTotal(Filme filme, PerfilUsuario perfil) {
-        int pontuacao = 0;
+    private void adicionarSeTiverPontuacaoMinima(
+            List<FilmeRecomendado> recomendacoes,
+            Filme filme,
+            PerfilUsuario perfilUsuario
+    ) {
+        int pontuacao = calculadoraPontuacao.calcular(filme, perfilUsuario);
 
-        for (CriterioRecomendacao criterio : criterios) {
-            pontuacao += criterio.calcularPontuacao(filme, perfil);
+        if (pontuacao >= PONTUACAO_MINIMA) {
+            recomendacoes.add(new FilmeRecomendado(filme, pontuacao));
         }
-
-        return pontuacao;
     }
 }

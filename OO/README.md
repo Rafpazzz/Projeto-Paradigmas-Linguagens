@@ -1,33 +1,53 @@
-# Paradigma Orientado a Objetos
+# Sistema de Recomendacao de Filmes em Java OO
 
-## Versao do compilador
+Projeto didatico em Java puro para demonstrar Programacao Orientada a Objetos, encapsulamento, classes com responsabilidades bem definidas, Strategy Pattern e principios SOLID.
 
-- Java: OpenJDK 21.0.11
-- Compilador: `javac 21.0.11`
+## Estrutura
 
-## Como compilar
-
-Execute os comandos a partir da raiz do repositorio:
-
-```bash
-mkdir -p /tmp/projeto-paradigmas-oo-build
-javac -d /tmp/projeto-paradigmas-oo-build $(find OO/src/main/java -name '*.java')
+```text
+OO/
+  src/main/java/recomendacao/
+    app/
+      Main.java
+    criterio/
+      CriterioRecomendacao.java
+      CriterioGenero.java
+      CriterioDuracao.java
+      CriterioClassificacao.java
+    model/
+      ClassificacaoEtaria.java
+      Filme.java
+      FilmeRecomendado.java
+      PerfilUsuario.java
+    repository/
+      CatalogoFilmes.java
+    service/
+      CalculadoraPontuacao.java
+      MotorRecomendacao.java
 ```
 
 ## Como executar
 
-Execute a partir da raiz do repositorio:
+Na raiz do repositorio:
 
 ```bash
-java -cp /tmp/projeto-paradigmas-oo-build recomendacao.app.Main
+javac -d /tmp/oo-build $(find OO/src/main/java -name '*.java')
+java -cp /tmp/oo-build recomendacao.app.Main
 ```
 
-O programa le os dados dos filmes no arquivo:
+## Regras
 
-```text
-OO/src/filmes
-```
+- O filme precisa ter pelo menos um genero favorito do usuario.
+- A duracao do filme precisa ser menor ou igual a duracao maxima do usuario.
+- A classificacao etaria do filme precisa ser permitida pela classificacao do usuario.
+- O humor adiciona prioridade para generos especificos.
+- Apenas filmes com pontuacao maior ou igual a 2 sao recomendados.
 
-## Dependencias externas
+## Pontuacao
 
-Nao ha dependencias externas. O projeto usa apenas bibliotecas padrao do Java.
+A `CalculadoraPontuacao` soma:
+
+- `+1` para cada genero do filme que esteja nos generos favoritos do usuario.
+- `+1` quando algum genero do filme coincide com os generos priorizados pelo humor.
+
+Duracao e classificacao etaria sao filtros, nao pontuacao.

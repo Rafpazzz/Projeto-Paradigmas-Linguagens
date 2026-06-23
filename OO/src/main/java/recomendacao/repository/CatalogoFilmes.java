@@ -1,85 +1,25 @@
 package recomendacao.repository;
 
-import recomendacao.model.Classificacao;
+import recomendacao.model.ClassificacaoEtaria;
 import recomendacao.model.Filme;
-import recomendacao.model.Genero;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.ArrayList;
 import java.util.List;
 
 public class CatalogoFilmes {
-    private final Path caminhoArquivo;
-
-    public CatalogoFilmes(Path caminhoArquivo) {
-        if (caminhoArquivo == null) {
-            throw new IllegalArgumentException("Caminho do arquivo de filmes deve ser informado.");
-        }
-
-        this.caminhoArquivo = caminhoArquivo;
-    }
-
-    public List<Filme> listarTodos() throws IOException {
-        List<Filme> filmes = new ArrayList<>();
-        List<String> linhas = Files.readAllLines(caminhoArquivo);
-
-        for (int i = 1; i < linhas.size(); i++) {
-            String linha = linhas.get(i).trim();
-
-            if (!linha.isEmpty()) {
-                filmes.add(criarFilme(linha));
-            }
-        }
-
-        return List.copyOf(filmes);
-    }
-
-    private Filme criarFilme(String linha) {
-        List<String> campos = separarCamposCsv(linha);
-
-        if (campos.size() != 5) {
-            throw new IllegalArgumentException("Linha de filme invalida: " + linha);
-        }
-
-        String titulo = campos.get(1);
-        List<Genero> generos = criarGeneros(campos.get(2));
-        int duracaoMinutos = Integer.parseInt(campos.get(3));
-        Classificacao classificacao = Classificacao.fromDescricao(campos.get(4));
-
-        return new Filme(titulo, generos, duracaoMinutos, classificacao);
-    }
-
-    private List<Genero> criarGeneros(String generosTexto) {
-        List<Genero> generos = new ArrayList<>();
-
-        for (String generoTexto : generosTexto.split(",")) {
-            generos.add(Genero.fromDescricao(generoTexto));
-        }
-
-        return generos;
-    }
-
-    private List<String> separarCamposCsv(String linha) {
-        List<String> campos = new ArrayList<>();
-        StringBuilder campoAtual = new StringBuilder();
-        boolean dentroDeAspas = false;
-
-        for (int i = 0; i < linha.length(); i++) {
-            char caractere = linha.charAt(i);
-
-            if (caractere == '"') {
-                dentroDeAspas = !dentroDeAspas;
-            } else if (caractere == ',' && !dentroDeAspas) {
-                campos.add(campoAtual.toString().trim());
-                campoAtual.setLength(0);
-            } else {
-                campoAtual.append(caractere);
-            }
-        }
-
-        campos.add(campoAtual.toString().trim());
-        return campos;
+    public List<Filme> listarFilmes() {
+        return List.of(
+                new Filme("Duna", List.of("ficcao_cientifica"), 155, ClassificacaoEtaria.DOZE),
+                new Filme("Vingadores", List.of("acao"), 149, ClassificacaoEtaria.DOZE),
+                new Filme("Forrest Gump", List.of("drama"), 142, ClassificacaoEtaria.LIVRE),
+                new Filme("Superbad", List.of("comedia"), 113, ClassificacaoEtaria.DEZOITO),
+                new Filme("La La Land", List.of("romance"), 128, ClassificacaoEtaria.LIVRE),
+                new Filme("Mad Max", List.of("acao"), 120, ClassificacaoEtaria.CATORZE),
+                new Filme("Her", List.of("ficcao_cientifica", "drama"), 126, ClassificacaoEtaria.CATORZE),
+                new Filme("Comer Rezar Amar", List.of("romance"), 133, ClassificacaoEtaria.LIVRE),
+                new Filme("Tropa de Elite", List.of("acao", "drama"), 115, ClassificacaoEtaria.DEZOITO),
+                new Filme("Interestelar", List.of("ficcao_cientifica"), 169, ClassificacaoEtaria.LIVRE),
+                new Filme("Clueless", List.of("comedia", "romance"), 97, ClassificacaoEtaria.CATORZE),
+                new Filme("O Poderoso Chefão", List.of("drama"), 175, ClassificacaoEtaria.CATORZE)
+        );
     }
 }

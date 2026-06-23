@@ -1,43 +1,41 @@
 package recomendacao.model;
 
+import java.util.ArrayList;
 import java.util.Collections;
-import java.util.EnumSet;
-import java.util.Set;
+import java.util.List;
 
 public class PerfilUsuario {
-    private final Set<Genero> generosFavoritos;
-    private final Humor humor;
-    private final int duracaoMaxima;
-    private final Classificacao classificacao;
+    private List<String> generosFavoritos;
+    private String humor;
+    private int duracaoMaxima;
+    private ClassificacaoEtaria classificacaoEtaria;
 
-    public PerfilUsuario(Set<Genero> generosFavoritos, Humor humor, int duracaoMaxima, Classificacao classificacao) {
-        if (generosFavoritos == null || generosFavoritos.isEmpty()) {
-            throw new IllegalArgumentException("Perfil deve possuir pelo menos um genero favorito.");
-        }
-
-        if (humor == null) {
-            throw new IllegalArgumentException("Humor deve ser informado.");
-        }
-
-        if (duracaoMaxima <= 0) {
-            throw new IllegalArgumentException("Duracao maxima deve ser positiva.");
-        }
-
-        if (classificacao == null) {
-            throw new IllegalArgumentException("Classificacao do perfil deve ser informada.");
-        }
-
-        this.generosFavoritos = Collections.unmodifiableSet(EnumSet.copyOf(generosFavoritos));
-        this.humor = humor;
-        this.duracaoMaxima = duracaoMaxima;
-        this.classificacao = classificacao;
+    public PerfilUsuario(
+            List<String> generosFavoritos,
+            String humor,
+            int duracaoMaxima,
+            ClassificacaoEtaria classificacaoEtaria
+    ) {
+        atualizarPerfil(generosFavoritos, humor, duracaoMaxima, classificacaoEtaria);
     }
 
-    public Set<Genero> getGenerosFavoritos() {
-        return generosFavoritos;
+    public void atualizarPerfil(
+            List<String> novosGenerosFavoritos,
+            String novoHumor,
+            int novaDuracaoMaxima,
+            ClassificacaoEtaria novaClassificacaoEtaria
+    ) {
+        this.generosFavoritos = new ArrayList<>(novosGenerosFavoritos);
+        this.humor = novoHumor;
+        this.duracaoMaxima = novaDuracaoMaxima;
+        this.classificacaoEtaria = novaClassificacaoEtaria;
     }
 
-    public Humor getHumor() {
+    public List<String> getGenerosFavoritos() {
+        return Collections.unmodifiableList(generosFavoritos);
+    }
+
+    public String getHumor() {
         return humor;
     }
 
@@ -45,7 +43,7 @@ public class PerfilUsuario {
         return duracaoMaxima;
     }
 
-    public Classificacao getClassificacao() {
-        return classificacao;
+    public ClassificacaoEtaria getClassificacaoEtaria() {
+        return classificacaoEtaria;
     }
 }
