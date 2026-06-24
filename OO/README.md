@@ -2,6 +2,14 @@
 
 Projeto didatico em Java puro para demonstrar Programacao Orientada a Objetos, encapsulamento, classes com responsabilidades bem definidas, Strategy Pattern e principios SOLID.
 
+## Ambiente
+
+- Linguagem: Java
+- Versao da linguagem usada: Java 21
+- Compilador utilizado: `javac 21.0.11`
+- Interpretador/runtime utilizado: `java 21.0.11`
+- Dependencias externas: nenhuma
+
 ## Estrutura
 
 ```text
@@ -34,6 +42,9 @@ Na raiz do repositorio:
 javac -d /tmp/oo-build $(find OO/src/main/java -name '*.java')
 java -cp /tmp/oo-build recomendacao.app.Main
 ```
+
+O primeiro comando compila todos os arquivos `.java` do projeto OO para a pasta temporaria `/tmp/oo-build`.
+O segundo comando executa a classe principal `recomendacao.app.Main`.
 
 ## Regras
 
