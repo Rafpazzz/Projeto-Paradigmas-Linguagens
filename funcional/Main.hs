@@ -14,7 +14,7 @@ data Humor
     = Animado
     | Reflexivo
     | Triste
-    deriving (Eq)
+    deriving (Eq, Show)
 
 -- Filme representa cada item da base obrigatoria do trabalho.
 data Filme = Filme
@@ -101,18 +101,17 @@ temGeneroFavorito :: PerfilUsuario -> Filme -> Bool
 temGeneroFavorito perfil =
     any (`elem` generosFavoritos perfil) . generos
 
--- Calcula a relevancia do filme para o perfil.
+-- Calcula a relevancia do filme para o perfil segundo a secao 2.4 do enunciado:
+--   +1 para cada genero do filme que esteja nos favoritos do usuario
+--   +1 se algum genero do filme coincidir com os generos priorizados pelo humor
 -- O bloco where separa os pedacos da conta sem criar estado mutavel.
 pontuacao :: PerfilUsuario -> Filme -> Int
 pontuacao perfil filmeAtual =
-    bonusGeneroAtendido + pontosGenerosFavoritos + bonusHumor
+    pontosGenerosFavoritos + bonusHumor
   where
     -- +1 para cada genero do filme que aparece nos favoritos do usuario.
     pontosGenerosFavoritos =
         length (filter (`elem` generosFavoritos perfil) (generos filmeAtual))
-    -- +1 quando a regra de genero foi satisfeita, mantendo equivalencia com o caso obrigatorio.
-    bonusGeneroAtendido =
-        if pontosGenerosFavoritos > 0 then 1 else 0
     -- +1 quando algum genero do filme coincide com os generos priorizados pelo humor.
     bonusHumor =
         if any (`elem` generosPorHumor (humor perfil)) (generos filmeAtual)
@@ -140,24 +139,42 @@ compararRecomendacoes primeira segunda =
 -- Transforma uma recomendacao em texto para exibir no terminal.
 mostrarRecomendacao :: Recomendacao -> String
 mostrarRecomendacao recomendacao =
-    "[" ++ show (pontuacaoFinal recomendacao) ++ " pts] "
+    let classif = if classificacao filmeAtual == classificacaoLivre
+                  then "livre"
+                  else show (classificacao filmeAtual)
+    in "[" ++ show (pontuacaoFinal recomendacao) ++ " pts] "
         ++ titulo filmeAtual
         ++ " ("
         ++ intercalate ", " (generos filmeAtual)
         ++ ", "
         ++ show (duracaoMinutos filmeAtual)
         ++ " min, "
-        ++ show (classificacao filmeAtual)
+        ++ classif
         ++ ")"
   where
     -- Apelido local para evitar repetir "filme recomendacao" varias vezes.
     filmeAtual = filme recomendacao
 
+-- Formata os dados de um perfil para exibicao.
+mostrarPerfil :: PerfilUsuario -> String
+mostrarPerfil perfil =
+    let gens = if null (generosFavoritos perfil)
+               then "nenhum"
+               else intercalate ", " (generosFavoritos perfil)
+        classif = if classificacaoPermitida perfil == classificacaoLivre
+                  then "livre"
+                  else show (classificacaoPermitida perfil)
+    in "generos: " ++ gens
+    ++ " | humor: " ++ show (humor perfil)
+    ++ " | duracao max: " ++ show (duracaoMaxima perfil) ++ " min"
+    ++ " | classificacao: " ++ classif
+
 -- Executa um cenario de teste e imprime suas recomendacoes.
 imprimirCenario :: String -> PerfilUsuario -> IO ()
 imprimirCenario nome perfil = do
-    putStrLn nome
-    putStrLn (replicate (length nome) '-')
+    let cabecalho = nome ++ " (" ++ mostrarPerfil perfil ++ ")"
+    putStrLn cabecalho
+    putStrLn (replicate (length cabecalho) '-')
     let recomendacoes = recomenda perfil catalogo
     if null recomendacoes
         then putStrLn "Nenhum filme recomendado."
@@ -167,6 +184,6 @@ imprimirCenario nome perfil = do
 -- Ponto de entrada do programa. A logica de recomendacao fica pura; aqui ha apenas IO.
 main :: IO ()
 main = do
-    imprimirCenario "Caso obrigatorio do enunciado" perfilObrigatorio
-    imprimirCenario "Perfil reflexivo amplo" perfilReflexivo
-    imprimirCenario "Perfil sem generos favoritos" perfilSemGeneros
+    imprimirCenario "USUARIO 01" perfilObrigatorio
+    imprimirCenario "USUARIO 02" perfilReflexivo
+    imprimirCenario "USUARIO 03" perfilSemGeneros
