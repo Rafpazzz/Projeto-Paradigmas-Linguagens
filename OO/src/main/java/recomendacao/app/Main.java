@@ -36,19 +36,7 @@ public class Main {
         MotorRecomendacao motorRecomendacao = new MotorRecomendacao(criterios, calculadoraPontuacao);
 
         imprimirRecomendacoes(
-                "Primeira recomendacao",
-                motorRecomendacao.recomendar(catalogo, perfilUsuario)
-        );
-
-        perfilUsuario.atualizarPerfil(
-                List.of("drama", "romance"),
-                "reflexivo",
-                180,
-                ClassificacaoEtaria.DEZOITO
-        );
-
-        imprimirRecomendacoes(
-                "Segunda recomendacao",
+                "Saida esperada",
                 motorRecomendacao.recomendar(catalogo, perfilUsuario)
         );
     }
@@ -66,12 +54,12 @@ public class Main {
         for (FilmeRecomendado recomendacao : recomendacoes) {
             Filme filme = recomendacao.getFilme();
             System.out.printf(
-                    "%s | generos: %s | duracao: %d min | classificacao: %s | pontuacao: %d%n",
+                    "[%d pts] %s (%s, %d min, %s)%n",
+                    recomendacao.getPontuacao(),
                     filme.getTitulo(),
-                    String.join(", ", filme.getGeneros()),
+                    String.join(" + ", filme.getGeneros()),
                     filme.getDuracaoMinutos(),
-                    filme.getClassificacaoEtaria(),
-                    recomendacao.getPontuacao()
+                    filme.getClassificacaoEtaria()
             );
         }
 

@@ -14,16 +14,22 @@ public class CalculadoraPontuacao {
     );
 
     public int calcular(Filme filme, PerfilUsuario perfilUsuario) {
-        int pontuacao = contarGenerosFavoritos(filme, perfilUsuario);
+        int pontosPorCriterioGenero = calcularPontosPorCriterioGenero(filme, perfilUsuario);
+        int pontosPorGenerosFavoritos = calcularPontosPorGenerosFavoritos(filme, perfilUsuario);
+        int pontosPorHumor = calcularPontosPorHumor(filme, perfilUsuario);
 
-        if (filme.possuiAlgumGenero(generosPriorizados(perfilUsuario))) {
-            pontuacao++;
-        }
-
-        return pontuacao;
+        return pontosPorCriterioGenero + pontosPorGenerosFavoritos + pontosPorHumor;
     }
 
-    private int contarGenerosFavoritos(Filme filme, PerfilUsuario perfilUsuario) {
+    private int calcularPontosPorCriterioGenero(Filme filme, PerfilUsuario perfilUsuario) {
+        if (filme.possuiAlgumGenero(perfilUsuario.getGenerosFavoritos())) {
+            return 1;
+        }
+
+        return 0;
+    }
+
+    private int calcularPontosPorGenerosFavoritos(Filme filme, PerfilUsuario perfilUsuario) {
         int total = 0;
 
         for (String genero : filme.getGeneros()) {
@@ -33,6 +39,14 @@ public class CalculadoraPontuacao {
         }
 
         return total;
+    }
+
+    private int calcularPontosPorHumor(Filme filme, PerfilUsuario perfilUsuario) {
+        if (filme.possuiAlgumGenero(generosPriorizados(perfilUsuario))) {
+            return 1;
+        }
+
+        return 0;
     }
 
     private List<String> generosPriorizados(PerfilUsuario perfilUsuario) {
