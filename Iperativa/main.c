@@ -38,7 +38,7 @@ Filme catalogo[TOTAL_FILMES] = {
 	{"Tropa de Elite", {"acao","drama"}, 2, 115, 18},
 	{"Interestelar", {"ficcao_cientifica"}, 1, 169, 0},
 	{"Clueless", {"comedia","romance"}, 2, 97, 14},
-	{"O Poderoso Chefao", {"drama"}, 1, 175, 14}
+	{"O Poderoso Chefão", {"drama"}, 1, 175, 14}
 };
 
 int classif_ok(int filme, int usuario) {
@@ -128,9 +128,51 @@ int comparar(const void *a, const void *b) {
 	Resultado *r1 = (Resultado*)a;
 	Resultado *r2 = (Resultado*)b;
 
-	return r2->pontuacao - r1->pontuacao;
+	if(r2->pontuacao != r1->pontuacao)
+		return r2->pontuacao - r1->pontuacao;
+
+	return strcmp(r1->filme.titulo, r2->filme.titulo);
 }
 
+const char* texto_classificacao(int classificacao, char buffer[10]) {
+	if(classificacao == 0)
+		return "livre";
+
+	sprintf(buffer, "%d", classificacao);
+	return buffer;
+}
+
+void texto_generos(const char generos[][30], int qtd, char buffer[120]) {
+	int i;
+
+	if(qtd == 0) {
+		strcpy(buffer, "nenhum");
+		return;
+	}
+
+	buffer[0] = '\0';
+
+	for(i = 0; i < qtd; i++) {
+		if(i > 0)
+			strcat(buffer, ", ");
+
+		strcat(buffer, generos[i]);
+	}
+}
+
+void imprimir_tracos(int qtd) {
+	int i;
+
+	for(i = 0; i < qtd; i++)
+		putchar('-');
+
+	putchar('\n');
+}
+
+void imprimir_cabecalho(const char *cabecalho) {
+	printf("%s\n", cabecalho);
+	imprimir_tracos(strlen(cabecalho));
+}
 
 void recomendar(PerfilUsuario usuario) {
 
@@ -161,17 +203,25 @@ void recomendar(PerfilUsuario usuario) {
 	qsort(resultados, qtd, sizeof(Resultado), comparar);
 
     if (qtd == 0){
-        printf("Nenhum filme recomendado.");
+        printf("Nenhum filme recomendado.\n\n");
         return;
     }
 
 	for(i = 0; i < qtd; i++) {
+		char generos_filme[120];
+		char classificacao_filme[10];
 
-		printf("[%d pts] %s (%d min, %d)\n",
+		texto_generos(resultados[i].filme.generos,
+		              resultados[i].filme.qtd_generos,
+		              generos_filme);
+
+		printf("[%d pts] %s (%s, %d min, %s)\n",
 		       resultados[i].pontuacao,
 		       resultados[i].filme.titulo,
+		       generos_filme,
 		       resultados[i].filme.duracao,
-		       resultados[i].filme.classificacao);
+		       texto_classificacao(resultados[i].filme.classificacao,
+		                           classificacao_filme));
 	}
 	
 	printf("\n");
@@ -181,8 +231,7 @@ int main() {
 
 	PerfilUsuario usuario1, usuario2, usuario3;
 
-    printf("USUARIO 01 (generos: acao, ficcao_cientifica | humor: Animado | duracao max: 150 min | classificacao: 14)\n");
-    printf("---------------------------------------------------------------------------------------------------------\n");
+    imprimir_cabecalho("USUARIO 01 (generos: acao, ficcao_cientifica | humor: Animado | duracao max: 150 min | classificacao: 14)");
 	strcpy(usuario1.generos_favoritos[0], "acao");
 	strcpy(usuario1.generos_favoritos[1], "ficcao_cientifica");
 	usuario1.qtd_favoritos = 2;
@@ -192,8 +241,7 @@ int main() {
 
 	recomendar(usuario1);
 	
-	printf("USUARIO 02 (generos: drama, romance | humor: Reflexivo | duracao max: 180 min | classificacao: 18)\n");
-	printf("---------------------------------------------------------------------------------------------------------\n");
+	imprimir_cabecalho("USUARIO 02 (generos: drama, romance | humor: Reflexivo | duracao max: 180 min | classificacao: 18)");
 	strcpy(usuario2.generos_favoritos[0], "drama");
 	strcpy(usuario2.generos_favoritos[1], "romance");
 	usuario2.qtd_favoritos = 2;
@@ -203,10 +251,9 @@ int main() {
 
 	recomendar(usuario2);
 	
-	printf("USUARIO 03 (generos: nenhum | humor: Triste | duracao max: 140 min | classificacao: livre)\n");
-	printf("---------------------------------------------------------------------------------------------------------\n");
+	imprimir_cabecalho("USUARIO 03 (generos: nenhum | humor: Triste | duracao max: 140 min | classificacao: livre)");
 	usuario3.qtd_favoritos = 0;
-	strcpy(usuario1.humor, "triste");
+	strcpy(usuario3.humor, "triste");
 	usuario3.duracao_max = 140;
 	usuario3.classificacao = 0;
 

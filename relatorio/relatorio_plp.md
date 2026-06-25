@@ -117,7 +117,7 @@ Mad Max e Vingadores podem trocar de ordem entre si porque possuem a mesma pontu
 1. A base original de 12 filmes foi mantida intacta.
 2. A comparação de gêneros usa identificadores sem acento, como `acao`, `comedia` e `ficcao_cientifica`, para evitar divergências entre linguagens.
 3. A entrada com lista vazia de gêneros favoritos não recomenda filmes, pois nenhum filme satisfaz a regra R1.
-4. Todas as quatro implementações foram integradas e produzem saídas equivalentes para o caso obrigatório.
+4. As implementações C, Java e Haskell imprimem a saída no mesmo formato; Prolog retorna pares `Pontuação-Título` na consulta.
 
 ---
 
@@ -125,12 +125,12 @@ Mad Max e Vingadores podem trocar de ordem entre si porque possuem a mesma pontu
 
 | Paradigma | Linguagem utilizada | Linhas de código atuais | Responsável |
 |---|---:|---:|---|
-| Imperativo | C / GCC 13.2.0 | 149 linhas de núcleo lógico | Crisfield |
-| Orientado a objetos | Java 21 | 249 linhas de núcleo lógico | Rafael |
-| Funcional | Haskell / GHC 9.10.3 | 125 linhas de núcleo lógico | João |
-| Lógico | Prolog / SWI-Prolog 9.2+ | 152 linhas de núcleo lógico | Crisfield |
+| Imperativo | C / GCC 13.2.0 | 178 linhas de núcleo lógico | Crisfield |
+| Orientado a objetos | Java 21 | 212 linhas de núcleo lógico | Rafael |
+| Funcional | Haskell / GHC 9.10.3 | 141 linhas de núcleo lógico | João |
+| Lógico | Prolog / SWI-Prolog 9.2+ | 135 linhas de núcleo lógico | Crisfield |
 
-> As linhas foram medidas excluindo linhas vazias e comentários. Para C, excluiu-se a função `main`; para Java, excluíram-se imports e classes de I/O; para Haskell e Prolog, contou-se o arquivo completo por ele conter apenas a lógica do problema.
+> As linhas foram medidas excluindo linhas vazias e comentários. Para C, excluiu-se a função `main`; para Java, excluíram-se imports, declaração de pacote e a classe de I/O `Main`; para Haskell e Prolog, contou-se o arquivo completo por ele concentrar a lógica do problema.
 
 ### 3.1 · Paradigma imperativo
 
@@ -155,7 +155,8 @@ void recomendar(PerfilUsuario usuario) {
             continue;
         if(filme.duracao > usuario.duracao_max)
             continue;
-        if(!classif_ok(filme.classificacao, usuario.idade))
+        if(!classif_ok(filme.classificacao,
+                       usuario.classificacao))
             continue;
 
         int pontos = calcular_pontuacao(filme, usuario);
@@ -298,11 +299,11 @@ pontuacao perfil filmeAtual =
 
 A implementação em Prolog organiza o domínio como fatos e regras declarativas, sem nenhum estado mutável. Os 12 filmes da base são declarados como fatos `filme/4`, contendo título, lista de gêneros, duração e classificação. A compatibilidade de classificação etária é modelada com fatos `nivel/2` que atribuem inteiros a cada faixa (`livre=0, 12=1, 14=2, 18=3`), e a regra `classif_ok/2` compara esses níveis.
 
-Cada regra de recomendação é um predicado independente. `possui_genero_favorito/2` verifica R1 por unificação com `member/2`. `classif_ok/2` resolve R3 por comparação numérica. `bonus_humor/3` implementa R4 com um corte (`!`) para evitar múltiplas soluções. A pontuação é calculada por `pontuacao/4`, que compõe `contar_generos/3` (recursivo) com o bônus de humor, seguindo a mesma fórmula usada nas demais implementações.
+Cada regra de recomendação é representada por predicados ou chamadas declarativas. A regra R1 é verificada diretamente com duas chamadas a `member/2`, uma sobre os gêneros do filme e outra sobre os favoritos do usuário. `classif_ok/2` resolve R3 por comparação numérica. `bonus_humor/3` implementa R4 com um corte (`!`) para evitar múltiplas soluções. A pontuação é calculada por `pontuacao/4`, que compõe `contar_generos/3` (recursivo) com o bônus de humor, seguindo a mesma fórmula usada nas demais implementações.
 
-O predicado principal `recomenda/5` unifica todas as regras em uma cláusula: o filme deve ter gênero favorito (R1), duração compatível (R2), classificação compatível (R3) e pontuação mínima 2 (R5). Para ordenar os resultados, a versão atual coleta os resultados com `findall/3` e usa `predsort/3` para ordenar por pontuação decrescente e, em caso de empate, por título em ordem alfabética.
+O predicado principal `recomenda/5` unifica todas as regras em uma cláusula: o filme deve ter gênero favorito (R1), duração compatível (R2), classificação compatível (R3) e pontuação mínima 2 (R5). Para ordenar os resultados, `recomenda_filmes/5` coleta pares `P-Titulo` com `findall/3`, ordena com `keysort/2` e inverte com `reverse/2` para obter pontuação decrescente.
 
-A elegância do Prolog está na correspondência direta entre a especificação e o código: cada regra do enunciado vira literalmente uma condição na cláusula `recomenda/5`. A principal dificuldade é que a ordenação não é natural no paradigma lógico puro — o backtracking gera soluções em ordem arbitrária, exigindo `findall` + `predsort` como etapa extra.
+A elegância do Prolog está na correspondência direta entre a especificação e o código: cada regra do enunciado vira literalmente uma condição na cláusula `recomenda/5`. A principal dificuldade é que a ordenação não é natural no paradigma lógico puro — o backtracking gera soluções em ordem arbitrária, exigindo `findall` + `keysort` + `reverse` como etapa extra.
 
 **Trecho representativo — lógico**
 
@@ -312,8 +313,8 @@ recomenda(Titulo, Humor, Favoritos,
 
     filme(Titulo, Generos, Duracao, ClassFilme),
 
-    possui_genero_favorito(Generos,
-                            Favoritos), % R1: genero
+    member(G, Generos),
+    member(G, Favoritos),          % R1: genero
 
     Duracao =< DuracaoMax,         % R2: duracao
 
@@ -334,17 +335,23 @@ O predicado `recomenda/5` mostra como as cinco condições do problema viram cin
 ```prolog
 recomenda_filmes(Favoritos, Humor, DuracaoMax,
                  Classificacao, Resultado) :-
-    resultados_ordenados(
-        Favoritos,
-        Humor,
-        DuracaoMax,
-        Classificacao,
-        Ordenados
+    findall(
+        P-Titulo,
+        (
+            filme(Titulo, Generos, Duracao, ClassFilme),
+            member(G, Generos), member(G, Favoritos),
+            Duracao =< DuracaoMax,
+            classif_ok(ClassFilme, Classificacao),
+            pontuacao(Generos, Favoritos, Humor, P),
+            P >= 2
+        ),
+        Lista
     ),
-    maplist(resultado_par, Ordenados, Resultado).
+    keysort(Lista, Ordenada),
+    reverse(Ordenada, Resultado).
 ```
 
-Como o Prolog não ordena resultados nativamente, `resultados_ordenados/5` coleta todas as soluções com `findall/3` e aplica `predsort/3` com um comparador próprio. Essa é a única parte do código que foge ao estilo puramente declarativo, mas é necessária para reproduzir a mesma ordenação usada no Haskell: pontuação decrescente e título crescente em caso de empate.
+Como o Prolog não ordena resultados nativamente, `recomenda_filmes/5` coleta todas as soluções com `findall/3`, ordena por pontuação com `keysort/2` e inverte a lista com `reverse/2` para ordem decrescente. Essa é a parte do código que mais se afasta do estilo puramente declarativo.
 
 **Cálculo da pontuação em Prolog**
 
@@ -365,7 +372,7 @@ A função `contar_generos/3` usa recursão para somar coincidências de gênero
 
 | Critério | Imperativo | Orientado a objetos | Funcional | Lógico |
 |---|---|---|---|---|
-| Linhas de código | 149 linhas de núcleo lógico | 249 linhas de núcleo lógico | 125 linhas de núcleo lógico | 152 linhas de núcleo lógico |
+| Linhas de código | 178 linhas de núcleo lógico | 212 linhas de núcleo lógico | 141 linhas de núcleo lógico | 135 linhas de núcleo lógico |
 | Legibilidade | O fluxo é linear, mas depende de `for`, `if` e `continue`, com estado explícito espalhado no algoritmo. | A lógica fica separada em classes, o que melhora a organização, mas aumenta o número de arquivos para acompanhar o fluxo. | A leitura é concentrada em poucas funções compostas, sem estado mutável. | As regras são próximas do enunciado, mas a ordenação exige predicados auxiliares e sai do estilo declarativo puro. |
 | Facilidade de depuração | É direta em depurador, porque o estado é visível passo a passo. | É modular, porque cada classe pode ser isolada. | É boa em funções puras, mas o pipeline completo exige acompanhar composição. | É mais difícil por causa de backtracking e da ordem das cláusulas. |
 | Adequação ao domínio | O domínio cabe bem em filtros e ordenação, mas exige manipulação manual de strings e arrays fixos. | O domínio encaixa bem em entidades e regras separadas. | O domínio encaixa bem em transformação de listas. | O núcleo encaixa bem em fatos e regras, mas a ordenação precisa de contorno extra. |
@@ -376,9 +383,9 @@ A função `contar_generos/3` usa recursão para somar coincidências de gênero
 
 **Qual paradigma se mostrou mais adequado para este problema e por quê?**
 
-Haskell foi o mais adequado porque o problema se reduz a uma sequência de filtros, cálculo de pontuação e ordenação sobre uma lista. Isso aparece no menor tamanho de código entre as quatro soluções: 125 linhas de núcleo lógico, contra 149 em C, 152 em Prolog e 249 em Java. A implementação funcional concentra a lógica em um pipeline de funções puras, o que reduz a quantidade de estrutura de controle necessária para expressar o algoritmo.
+Haskell foi o mais adequado porque o problema se reduz a uma sequência de filtros, cálculo de pontuação e ordenação sobre uma lista. Pela contagem atual, ficou com 141 linhas de núcleo lógico, abaixo de C (178) e Java (212), e próximo de Prolog (135). A vantagem técnica está na forma do código: a implementação funcional concentra a lógica em um pipeline de funções puras, o que reduz a quantidade de estado manual necessário para expressar o algoritmo.
 
-A diferença não é só de volume. Em Java, a mesma solução ficou espalhada em mais classes e arquivos, porque cada responsabilidade foi separada em uma unidade própria. Em C, a lógica continuou explícita em loops e condicionais, o que aumenta o ruído do código central. Haskell foi o mais aderente ao formato do problema porque expressa diretamente transformação de dados, sem precisar converter a ideia em um fluxo de controle mais pesado.
+A diferença não é só de volume. Em Java, a mesma solução ficou espalhada em classes e arquivos porque cada responsabilidade foi separada em uma unidade própria. Em C, a lógica continuou explícita em loops, condicionais, comparação manual de strings e funções extras para formatar a saída igual a Java/Haskell. Prolog foi o menor em linhas, mas exigiu `findall`, `keysort` e `reverse` para ranquear os resultados. Haskell foi o mais aderente ao formato do problema porque expressa diretamente transformação de dados.
 
 **Onde cada paradigma impôs mais dificuldade ou fricção?**
 
@@ -394,25 +401,25 @@ Em Haskell, um mecanismo mais direto de colecionar resultados como o `findall` d
 
 **A solução mais curta foi necessariamente a mais fácil de entender?**
 
-Não. Haskell foi a mais curta, mas exige familiaridade com composição e tipos. A concisão de 125 linhas não elimina a necessidade de entender pipeline funcional, ordem de composição e tipagem, então a redução de tamanho não se converte automaticamente em leitura mais fácil.
+Não. A implementação mais curta pela contagem atual foi Prolog, com 135 linhas de núcleo lógico, mas ela exige familiaridade com unificação, backtracking, `findall`, `keysort` e `reverse`. A redução de linhas não elimina a complexidade de entender como as soluções são geradas e depois ordenadas.
 
-C e Java são mais fáceis de ler para quem já conhece paradigmas imperativos, mesmo com mais código, porque `for`, `if`, chamadas de método e classes nomeadas são estruturas familiares. Prolog também é conciso, mas o fluxo de execução fica menos previsível por causa do backtracking, então a menor quantidade de linhas não significa menor complexidade de entendimento.
+C e Java são mais fáceis de ler para quem já conhece paradigmas imperativos, mesmo com mais código, porque `for`, `if`, chamadas de método e classes nomeadas são estruturas familiares. Haskell ficou menor que C após a padronização da saída, mas sua leitura depende de entender composição de funções e tipos algébricos. Portanto, a menor quantidade de linhas não significa automaticamente menor dificuldade.
 
 ---
 
 ## 05 Conclusão
 
-Este trabalho implementou o mesmo sistema de recomendação de filmes em quatro paradigmas — imperativo (C), orientado a objetos (Java), funcional (Haskell) e lógico (Prolog) — e os resultados confirmam que a escolha do paradigma molda profundamente a arquitetura da solução, mesmo quando a saída é idêntica.
+Este trabalho implementou o mesmo sistema de recomendação de filmes em quatro paradigmas — imperativo (C), orientado a objetos (Java), funcional (Haskell) e lógico (Prolog) — e os resultados confirmam que a escolha do paradigma molda profundamente a arquitetura da solução, mesmo quando as recomendações calculadas são equivalentes.
 
 Em C, o foco esteve no controle explícito de estado e fluxo: cada decisão do algoritmo é visível como `if`/`continue`, cada comparação é um `strcmp`, cada iteração é um `for`. A solução é previsível e familiar, mas a verbosidade cresce linearmente com cada nova regra.
 
-Em Java, o foco esteve em responsabilidades e extensibilidade: 8 classes distribuem o problema em unidades nomeadas e substituíveis. O Strategy Pattern permite adicionar critérios sem modificar código existente, mas o custo é uma implementação 99% mais longa que Haskell (249 vs 125 linhas).
+Em Java, o foco esteve em responsabilidades e extensibilidade: as classes distribuem o problema em unidades nomeadas e substituíveis. O Strategy Pattern permite adicionar critérios sem modificar o motor principal, mas o custo é uma implementação maior que as demais na contagem de núcleo lógico (212 linhas).
 
 Em Haskell, o foco esteve na transformação de dados: um pipeline de 5 funções resolve o núcleo do problema. A imutabilidade elimina efeitos colaterais, e funções puras facilitam teste e paralelização. A contrapartida é uma curva de aprendizado mais íngreme e menor acessibilidade para equipes sem experiência funcional.
 
-Em Prolog, o foco esteve na declaração de conhecimento: fatos e regras mapeiam diretamente o enunciado. A unificação e o backtracking resolvem automaticamente a busca por filmes compatíveis. A fragilidade está na ordenação — o paradigma não foi projetado para ranqueamento, e `findall`/`predsort` quebram o estilo declarativo.
+Em Prolog, o foco esteve na declaração de conhecimento: fatos e regras mapeiam diretamente o enunciado. A unificação e o backtracking resolvem automaticamente a busca por filmes compatíveis. A fragilidade está na ordenação — o paradigma não foi projetado para ranqueamento, e `findall`/`keysort`/`reverse` quebram o estilo declarativo.
 
-O que o grupo não esperava antes de implementar: (1) a diferença de 5x em linhas para expressar a mesma regra de humor entre C (15) e Prolog (3); (2) que a implementação mais curta (Haskell, 125 linhas) não é a mais fácil de entender para quem não conhece o paradigma; (3) que o Prolog, apesar de ser o paradigma mais distante do imperativo, é o que tem a correspondência mais direta entre enunciado e código — cada regra vira literalmente uma linha do predicado.
+O que o grupo não esperava antes de implementar: (1) a diferença de 5x em linhas para expressar a mesma regra de humor entre C (15) e Prolog (3); (2) que a implementação mais curta em linhas não é necessariamente a mais fácil de entender; (3) que o Prolog, apesar de ser o paradigma mais distante do imperativo, é o que tem a correspondência mais direta entre enunciado e código na parte de fatos e regras.
 
 Se o grupo tivesse que resolver um problema similar em produção, a escolha dependeria do contexto: para um sistema com requisitos estáveis e foco em processamento de dados, Haskell ofereceria a melhor relação concisão/segurança; para um sistema com regras de negócio que mudam frequentemente e equipe grande, Java OO com Strategy seria a escolha mais sustentável; para um sistema embarcado com restrições de memória, C seria a opção natural; para um sistema especialista com muitas regras interdependentes, Prolog teria vantagem pela proximidade entre especificação e implementação.
 
