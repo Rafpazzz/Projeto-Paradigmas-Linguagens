@@ -53,15 +53,15 @@ filme('Clueless',
       97,
       14).
 
-filme('O Poderoso Chefão',
+filme('O Poderoso Chefao',
       [drama],
       175,
       14).
 
-nivel(livre, 0).
-nivel(12, 1).
-nivel(14, 2).
-nivel(18, 3).
+nivel(livre,0).
+nivel(12,1).
+nivel(14,2).
+nivel(18,3).
 
 classif_ok(Filme, Usuario) :-
     nivel(Filme, N1),
@@ -88,10 +88,6 @@ contar_generos([G|R], Favoritos, P) :-
     \+ member(G, Favoritos),
     contar_generos(R, Favoritos, P).
 
-possui_genero_favorito(Generos, Favoritos) :-
-    member(G, Generos),
-    member(G, Favoritos).
-
 bonus_humor(Generos, Humor, 1) :-
     humor_genero(Humor, Prioritarios),
     member(G, Generos),
@@ -105,17 +101,13 @@ pontuacao(Generos,
           Humor,
           Pontos) :-
 
-    contar_generos(
-        Generos,
-        Favoritos,
-        P1
-    ),
+    contar_generos(Generos,
+                   Favoritos,
+                   P1),
 
-    bonus_humor(
-        Generos,
-        Humor,
-        P2
-    ),
+    bonus_humor(Generos,
+                Humor,
+                P2),
 
     Pontos is P1 + P2.
 
@@ -130,8 +122,8 @@ recomenda(Titulo,
           Duracao,
           ClassFilme),
 
-    possui_genero_favorito(Generos,
-                            Favoritos),
+    member(G, Generos),
+    member(G, Favoritos),
 
     Duracao =< DuracaoMax,
 
@@ -151,174 +143,33 @@ recomenda_filmes(Favoritos,
                  Classificacao,
                  Resultado) :-
 
-    resultados_ordenados(
-        Favoritos,
-        Humor,
-        DuracaoMax,
-        Classificacao,
-        Ordenados
-    ),
-
-    maplist(resultado_par, Ordenados, Resultado).
-
-resultado_par(resultado(Pontos, Titulo, _, _, _), Pontos-Titulo).
-
-resultado_recomendado(Favoritos,
-                      Humor,
-                      DuracaoMax,
-                      Classificacao,
-                      resultado(P, Titulo, Generos, Duracao, ClassFilme)) :-
-
-    filme(Titulo,
-          Generos,
-          Duracao,
-          ClassFilme),
-
-    possui_genero_favorito(Generos,
-                            Favoritos),
-
-    Duracao =< DuracaoMax,
-
-    classif_ok(ClassFilme,
-               Classificacao),
-
-    pontuacao(
-        Generos,
-        Favoritos,
-        Humor,
-        P
-    ),
-
-    P >= 2.
-
-comparar_resultados(Ordem,
-                    resultado(P1, T1, _, _, _),
-                    resultado(P2, T2, _, _, _)) :-
-
-    compare(ComparacaoPontos, P2, P1),
-    (
-        ComparacaoPontos = (=)
-        ->
-        compare(Ordem, T1, T2)
-        ;
-        Ordem = ComparacaoPontos
-    ).
-
-resultados_ordenados(Favoritos,
-                     Humor,
-                     DuracaoMax,
-                     Classificacao,
-                     Ordenados) :-
-
     findall(
-        Resultado,
-        resultado_recomendado(
-            Favoritos,
-            Humor,
-            DuracaoMax,
-            Classificacao,
-            Resultado
+        P-Titulo,
+        (
+            filme(Titulo,
+                  Generos,
+                  Duracao,
+                  ClassFilme),
+
+            member(G, Generos),
+            member(G, Favoritos),
+
+            Duracao =< DuracaoMax,
+
+            classif_ok(ClassFilme,
+                       Classificacao),
+
+            pontuacao(
+                Generos,
+                Favoritos,
+                Humor,
+                P
+            ),
+
+            P >= 2
         ),
         Lista
     ),
 
-    predsort(comparar_resultados, Lista, Ordenados).
-
-texto_humor(animado, 'Animado').
-texto_humor(reflexivo, 'Reflexivo').
-texto_humor(triste, 'Triste').
-
-texto_classificacao(livre, livre).
-
-texto_classificacao(Classificacao, Texto) :-
-    number(Classificacao),
-    atom_number(Texto, Classificacao).
-
-texto_generos([], nenhum).
-
-texto_generos(Generos, Texto) :-
-    Generos \= [],
-    atomic_list_concat(Generos, ', ', Texto).
-
-imprimir_tracos(0) :-
-    nl.
-
-imprimir_tracos(Quantidade) :-
-    Quantidade > 0,
-    write('-'),
-    Proxima is Quantidade - 1,
-    imprimir_tracos(Proxima).
-
-imprimir_resultado(resultado(Pontos, Titulo, Generos, Duracao, Classificacao)) :-
-    texto_generos(Generos, GenerosTexto),
-    texto_classificacao(Classificacao, ClassificacaoTexto),
-    format('[~w pts] ~a (~a, ~w min, ~a)~n',
-           [Pontos, Titulo, GenerosTexto, Duracao, ClassificacaoTexto]).
-
-imprimir_resultados([]) :-
-    writeln('Nenhum filme recomendado.').
-
-imprimir_resultados([Resultado|Restante]) :-
-    imprimir_resultado(Resultado),
-    imprimir_resultados_restantes(Restante).
-
-imprimir_resultados_restantes([]).
-
-imprimir_resultados_restantes([Resultado|Restante]) :-
-    imprimir_resultado(Resultado),
-    imprimir_resultados_restantes(Restante).
-
-imprimir_cenario(Nome,
-                 Favoritos,
-                 Humor,
-                 DuracaoMax,
-                 Classificacao) :-
-
-    texto_generos(Favoritos, GenerosTexto),
-    texto_humor(Humor, HumorTexto),
-    texto_classificacao(Classificacao, ClassificacaoTexto),
-    format(string(Cabecalho),
-           '~a (generos: ~a | humor: ~a | duracao max: ~w min | classificacao: ~a)',
-           [Nome, GenerosTexto, HumorTexto, DuracaoMax, ClassificacaoTexto]),
-
-    format('~s~n', [Cabecalho]),
-    string_length(Cabecalho, Tamanho),
-    imprimir_tracos(Tamanho),
-
-    resultados_ordenados(
-        Favoritos,
-        Humor,
-        DuracaoMax,
-        Classificacao,
-        Resultados
-    ),
-
-    imprimir_resultados(Resultados),
-    nl.
-
-main :-
-    imprimir_cenario(
-        'USUARIO 01',
-        [acao, ficcao_cientifica],
-        animado,
-        150,
-        14
-    ),
-
-    imprimir_cenario(
-        'USUARIO 02',
-        [drama, romance],
-        reflexivo,
-        180,
-        18
-    ),
-
-    imprimir_cenario(
-        'USUARIO 03',
-        [],
-        triste,
-        140,
-        livre
-    ).
-
-:- initialization(main, main).
+    keysort(Lista, Ordenada),
+    reverse(Ordenada, Resultado).
