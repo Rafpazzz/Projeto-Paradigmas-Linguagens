@@ -14,7 +14,10 @@ public class CalculadoraPontuacao {
     );
 
     public int calcular(Filme filme, PerfilUsuario perfilUsuario) {
-        int pontuacao = contarGenerosFavoritos(filme, perfilUsuario);
+        int generosFavoritosEncontrados = contarGenerosFavoritos(filme, perfilUsuario);
+        int pontuacao = generosFavoritosEncontrados > 0 ? 1 : 0;
+
+        pontuacao += generosFavoritosEncontrados;
 
         if (filme.possuiAlgumGenero(generosPriorizados(perfilUsuario))) {
             pontuacao++;

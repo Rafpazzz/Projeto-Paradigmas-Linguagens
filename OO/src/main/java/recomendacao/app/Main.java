@@ -19,13 +19,6 @@ public class Main {
         CatalogoFilmes catalogoFilmes = new CatalogoFilmes();
         List<Filme> catalogo = catalogoFilmes.listarFilmes();
 
-        PerfilUsuario perfilUsuario = new PerfilUsuario(
-                List.of("acao", "ficcao_cientifica"),
-                "animado",
-                150,
-                ClassificacaoEtaria.CATORZE
-        );
-
         List<CriterioRecomendacao> criterios = List.of(
                 new CriterioGenero(),
                 new CriterioDuracao(),
@@ -35,22 +28,42 @@ public class Main {
         CalculadoraPontuacao calculadoraPontuacao = new CalculadoraPontuacao();
         MotorRecomendacao motorRecomendacao = new MotorRecomendacao(criterios, calculadoraPontuacao);
 
-        imprimirRecomendacoes(
-                "Primeira recomendacao",
-                motorRecomendacao.recomendar(catalogo, perfilUsuario)
+        List<CenarioEntrada> cenarios = List.of(
+                new CenarioEntrada(
+                        "Caso obrigatorio do enunciado",
+                        new PerfilUsuario(
+                                List.of("acao", "ficcao_cientifica"),
+                                "animado",
+                                150,
+                                ClassificacaoEtaria.CATORZE
+                        )
+                ),
+                new CenarioEntrada(
+                        "Perfil reflexivo amplo",
+                        new PerfilUsuario(
+                                List.of("drama", "romance"),
+                                "reflexivo",
+                                180,
+                                ClassificacaoEtaria.DEZOITO
+                        )
+                ),
+                new CenarioEntrada(
+                        "Perfil sem generos favoritos",
+                        new PerfilUsuario(
+                                List.of(),
+                                "triste",
+                                140,
+                                ClassificacaoEtaria.LIVRE
+                        )
+                )
         );
 
-        perfilUsuario.atualizarPerfil(
-                List.of("drama", "romance"),
-                "reflexivo",
-                180,
-                ClassificacaoEtaria.DEZOITO
-        );
-
-        imprimirRecomendacoes(
-                "Segunda recomendacao",
-                motorRecomendacao.recomendar(catalogo, perfilUsuario)
-        );
+        for (CenarioEntrada cenario : cenarios) {
+            imprimirRecomendacoes(
+                    cenario.titulo(),
+                    motorRecomendacao.recomendar(catalogo, cenario.perfilUsuario())
+            );
+        }
     }
 
     private static void imprimirRecomendacoes(String titulo, List<FilmeRecomendado> recomendacoes) {
@@ -76,5 +89,8 @@ public class Main {
         }
 
         System.out.println();
+    }
+
+    private record CenarioEntrada(String titulo, PerfilUsuario perfilUsuario) {
     }
 }
