@@ -30,7 +30,7 @@ public class Main {
 
         List<CenarioEntrada> cenarios = List.of(
                 new CenarioEntrada(
-                        "Caso obrigatorio do enunciado",
+                        "USUARIO 01",
                         new PerfilUsuario(
                                 List.of("acao", "ficcao_cientifica"),
                                 "animado",
@@ -39,7 +39,7 @@ public class Main {
                         )
                 ),
                 new CenarioEntrada(
-                        "Perfil reflexivo amplo",
+                        "USUARIO 02",
                         new PerfilUsuario(
                                 List.of("drama", "romance"),
                                 "reflexivo",
@@ -48,7 +48,7 @@ public class Main {
                         )
                 ),
                 new CenarioEntrada(
-                        "Perfil sem generos favoritos",
+                        "USUARIO 03",
                         new PerfilUsuario(
                                 List.of(),
                                 "triste",
@@ -60,15 +60,17 @@ public class Main {
 
         for (CenarioEntrada cenario : cenarios) {
             imprimirRecomendacoes(
-                    cenario.titulo(),
+                    cenario,
                     motorRecomendacao.recomendar(catalogo, cenario.perfilUsuario())
             );
         }
     }
 
-    private static void imprimirRecomendacoes(String titulo, List<FilmeRecomendado> recomendacoes) {
-        System.out.println(titulo);
-        System.out.println("-".repeat(titulo.length()));
+    private static void imprimirRecomendacoes(CenarioEntrada cenario, List<FilmeRecomendado> recomendacoes) {
+        String cabecalho = cenario.titulo() + " (" + formatarPerfil(cenario.perfilUsuario()) + ")";
+
+        System.out.println(cabecalho);
+        System.out.println("-".repeat(cabecalho.length()));
 
         if (recomendacoes.isEmpty()) {
             System.out.println("Nenhum filme recomendado.");
@@ -82,13 +84,33 @@ public class Main {
                     "[%d pts] %s (%s, %d min, %s)%n",
                     recomendacao.getPontuacao(),
                     filme.getTitulo(),
-                    String.join(" + ", filme.getGeneros()),
+                    String.join(", ", filme.getGeneros()),
                     filme.getDuracaoMinutos(),
                     filme.getClassificacaoEtaria()
             );
         }
 
         System.out.println();
+    }
+
+    private static String formatarPerfil(PerfilUsuario perfilUsuario) {
+        String generos = perfilUsuario.getGenerosFavoritos().isEmpty()
+                ? "nenhum"
+                : String.join(", ", perfilUsuario.getGenerosFavoritos());
+
+        return "generos: " + generos
+                + " | humor: " + formatarHumor(perfilUsuario.getHumor())
+                + " | duracao max: " + perfilUsuario.getDuracaoMaxima() + " min"
+                + " | classificacao: " + perfilUsuario.getClassificacaoEtaria();
+    }
+
+    private static String formatarHumor(String humor) {
+        return switch (humor) {
+            case "animado" -> "Animado";
+            case "reflexivo" -> "Reflexivo";
+            case "triste" -> "Triste";
+            default -> humor;
+        };
     }
 
     private record CenarioEntrada(String titulo, PerfilUsuario perfilUsuario) {

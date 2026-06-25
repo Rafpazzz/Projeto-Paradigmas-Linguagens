@@ -4,23 +4,20 @@
 
 SWI-Prolog 9.2+
 
-## Execução
+## Execução direta
 
-Abrir o SWI-Prolog:
+Executar o programa pela raiz do projeto:
 
 ```bash
-swipl
+swipl -q -s logica/logica.pl
 ```
 
-Carregar o programa:
+## Consulta manual
+
+Tambem e possivel abrir o SWI-Prolog e consultar o predicado principal:
 
 ```prolog
-?- [recomendador].
-```
-
-Executar a consulta:
-
-```prolog
+?- [logica/logica].
 ?- recomenda_filmes(
        [acao, ficcao_cientifica],
        animado,
@@ -42,4 +39,4 @@ A implementação segue o paradigma lógico puro:
 * regras declarativas
 * sem assertz/retract
 * uso de findall/3
-* ordenação com keysort/2
+* ordenação com predsort/3

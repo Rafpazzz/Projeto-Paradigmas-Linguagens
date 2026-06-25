@@ -7,8 +7,8 @@ Sistema de recomendacao de filmes implementado em paradigmas diferentes para com
 ```text
 OO/          Implementacao orientada a objetos em Java
 funcional/  Implementacao funcional em Haskell
-Iperativa/  Espaco reservado para a implementacao imperativa em C
-logica/     Espaco reservado para a implementacao logica em Prolog
+Iperativa/  Implementacao imperativa em C
+logica/     Implementacao logica em Prolog
 ```
 
 ## Como executar
@@ -19,8 +19,8 @@ Cada implementacao deve ser executada pelos comandos descritos no README da sua 
 
 1. Java OO: veja `OO/README.md`.
 2. Haskell funcional: veja `funcional/README.md`.
-3. C imperativo: pendente de integracao.
-4. Prolog logico: pendente de integracao.
+3. C imperativo: veja `Iperativa/README.md`.
+4. Prolog logico: veja `logica/README.md`.
 
 ## Caso obrigatorio
 
@@ -36,9 +36,8 @@ classificacao: 14
 Saida esperada:
 
 ```text
-[3 pts] Mad Max
-[3 pts] Vingadores
-[2 pts] Her
+[2 pts] Mad Max (acao, 120 min, 14)
+[2 pts] Vingadores (acao, 149 min, 12)
 ```
 
-Mad Max e Vingadores podem trocar de ordem por terem a mesma pontuacao.
+Mad Max e Vingadores possuem a mesma pontuacao. A saida padronizada ordena empates pelo titulo.

@@ -119,7 +119,6 @@ java -cp "$env:TEMP\oo-build" recomendacao.app.Main
 
 A `CalculadoraPontuacao` soma:
 
-- `+1` quando a regra de genero e satisfeita, isto e, quando ha ao menos um genero favorito no filme.
 - `+1` para cada genero do filme que esteja nos generos favoritos do usuario.
 - `+1` quando algum genero do filme coincide com os generos priorizados pelo humor.
 

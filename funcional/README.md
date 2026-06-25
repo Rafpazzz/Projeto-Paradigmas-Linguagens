@@ -91,9 +91,8 @@ O segundo comando executa esse binario compilado.
 
 ## Pontuacao
 
-Para ficar equivalente ao caso de teste obrigatorio do enunciado, a pontuacao soma:
+Para seguir a regra de pontuacao do enunciado, a pontuacao soma:
 
-- `+1` quando a regra de genero e satisfeita, isto e, quando ha ao menos um genero favorito no filme.
 - `+1` para cada genero do filme que esteja nos generos favoritos do usuario.
 - `+1` quando algum genero do filme coincide com os generos priorizados pelo humor.
 
