@@ -17,14 +17,26 @@ swipl -q -s logica/logica.pl
 Tambem e possivel abrir o SWI-Prolog e consultar o predicado principal:
 
 ```prolog
-?- [logica/logica].
-?- recomenda_filmes(
-       [acao, ficcao_cientifica],
-       animado,
-       150,
-       14,
-       Resultado
-   ).
+   recomenda_filmes([acao, ficcao_cientifica],
+                    animado,
+                    150,
+                    14,
+                    Aluno1),
+   writeln(Aluno1),
+
+   recomenda_filmes([drama, romance],
+                    reflexivo,
+                    180,
+                    18,
+                    Aluno2),
+   writeln(Aluno2),
+
+   recomenda_filmes([],
+                    triste,
+                    140,
+                    livre,
+                    Aluno3),
+   writeln(Aluno3).
 ```
 
 ## Dependências
