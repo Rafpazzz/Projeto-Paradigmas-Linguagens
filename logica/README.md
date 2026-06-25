@@ -21,22 +21,22 @@ Tambem e possivel abrir o SWI-Prolog e consultar o predicado principal:
                     animado,
                     150,
                     14,
-                    Aluno1),
-   writeln(Aluno1),
+                    Usuario1),
+   writeln(Usuario1),
 
    recomenda_filmes([drama, romance],
                     reflexivo,
                     180,
                     18,
-                    Aluno2),
-   writeln(Aluno2),
+                    Usuario2),
+   writeln(Usuario2),
 
    recomenda_filmes([],
                     triste,
                     140,
                     livre,
-                    Aluno3),
-   writeln(Aluno3).
+                    Usuario3),
+   writeln(Usuario3).
 ```
 
 ## Dependências
