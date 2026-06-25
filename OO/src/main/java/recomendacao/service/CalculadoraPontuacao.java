@@ -14,19 +14,10 @@ public class CalculadoraPontuacao {
     );
 
     public int calcular(Filme filme, PerfilUsuario perfilUsuario) {
-        int pontosPorCriterioGenero = calcularPontosPorCriterioGenero(filme, perfilUsuario);
         int pontosPorGenerosFavoritos = calcularPontosPorGenerosFavoritos(filme, perfilUsuario);
         int pontosPorHumor = calcularPontosPorHumor(filme, perfilUsuario);
 
-        return pontosPorCriterioGenero + pontosPorGenerosFavoritos + pontosPorHumor;
-    }
-
-    private int calcularPontosPorCriterioGenero(Filme filme, PerfilUsuario perfilUsuario) {
-        if (filme.possuiAlgumGenero(perfilUsuario.getGenerosFavoritos())) {
-            return 1;
-        }
-
-        return 0;
+        return pontosPorGenerosFavoritos + pontosPorHumor;
     }
 
     private int calcularPontosPorGenerosFavoritos(Filme filme, PerfilUsuario perfilUsuario) {
