@@ -28,12 +28,6 @@ public class Main {
         CalculadoraPontuacao calculadoraPontuacao = new CalculadoraPontuacao();
         MotorRecomendacao motorRecomendacao = new MotorRecomendacao(criterios, calculadoraPontuacao);
 
-<<<<<<< HEAD
-        imprimirRecomendacoes(
-                "Saida esperada",
-                motorRecomendacao.recomendar(catalogo, perfilUsuario)
-        );
-=======
         List<CenarioEntrada> cenarios = List.of(
                 new CenarioEntrada(
                         "Caso obrigatorio do enunciado",
@@ -70,7 +64,6 @@ public class Main {
                     motorRecomendacao.recomendar(catalogo, cenario.perfilUsuario())
             );
         }
->>>>>>> ce3ffa35de210c3aa4a5da632ea7cd0742b91e56
     }
 
     private static void imprimirRecomendacoes(String titulo, List<FilmeRecomendado> recomendacoes) {

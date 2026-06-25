@@ -14,16 +14,9 @@ public class CalculadoraPontuacao {
     );
 
     public int calcular(Filme filme, PerfilUsuario perfilUsuario) {
-<<<<<<< HEAD
         int pontosPorCriterioGenero = calcularPontosPorCriterioGenero(filme, perfilUsuario);
         int pontosPorGenerosFavoritos = calcularPontosPorGenerosFavoritos(filme, perfilUsuario);
         int pontosPorHumor = calcularPontosPorHumor(filme, perfilUsuario);
-=======
-        int generosFavoritosEncontrados = contarGenerosFavoritos(filme, perfilUsuario);
-        int pontuacao = generosFavoritosEncontrados > 0 ? 1 : 0;
-
-        pontuacao += generosFavoritosEncontrados;
->>>>>>> ce3ffa35de210c3aa4a5da632ea7cd0742b91e56
 
         return pontosPorCriterioGenero + pontosPorGenerosFavoritos + pontosPorHumor;
     }
